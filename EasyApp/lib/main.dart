@@ -1,13 +1,19 @@
 import 'package:flutter/material.dart';
 
+import 'package:EasyApp/event/event_bus.dart';
 import 'package:EasyApp/utils/provider.dart';
+import 'package:EasyApp/utils/file_utils.dart';
+import 'package:EasyApp/views/home.dart';
+import 'package:EasyApp/views/login_page/login_page.dart';
+import 'package:flutter_spinkit/flutter_spinkit.dart';
+import 'package:event_bus/event_bus.dart';
 
 
 // 启动入口
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
-//  final provider = new Provider();
-//  await provider.init(true);
+  final provider = new Provider();
+  await provider.init(true);
   runApp(new MyApp());
 }
 
@@ -18,14 +24,21 @@ class MyApp extends StatefulWidget {
 
 class _MyAppState extends State<MyApp> {
   int themeColor = 0xFFC91B3A;
+  bool _hasLogin = false;
+  bool _isLoading = true;
 
   _MyAppState() {
-
+    final eventBus = new EventBus();
+    ApplicationEvent.event = eventBus;
   }
 
   @override
   void initState() {
-
+    super.initState();
+    FileUtils.readFile().then((value) {
+      _isLoading = false;
+      print('读取到数据：'+value);
+    });
   }
 
   @override
@@ -46,12 +59,30 @@ class _MyAppState extends State<MyApp> {
         ),
       ),
       home: Scaffold(
-        appBar: AppBar(title: Text('welcome to flutter'),),
-        body: Center(child: Text('hello world'),),
+        body: showWelcomePage(),
       ),
       debugShowCheckedModeBanner: false,
 //      onGenerateRoute: Application.router.generator,
 //      navigatorObservers: <NavigatorObserver>[Analytics.observer],
     );
+  }
+
+  // 显示欢迎页
+  showWelcomePage() {
+    if (_isLoading) {
+      return Container(
+        color: Color(this.themeColor),
+        child: Center(child: SpinKitPouringHourglass(color: Colors.white),),
+      );
+    }
+    else {
+      // 判断是否已经登录
+      if (_hasLogin) {
+        return AppPage();
+      }
+      else {
+        return LoginPage();
+      }
+    }
   }
 }

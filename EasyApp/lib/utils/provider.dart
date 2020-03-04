@@ -32,7 +32,7 @@ class Provider {
   // 初始化数据库
   Future init(bool isCreate) async {
     String databasesPath = await getDatabasesPath();
-    String path = join(databasesPath, 'flutter.db');
+    String path = join(databasesPath, 'easy_app.db');
     print(path);
   }
 
