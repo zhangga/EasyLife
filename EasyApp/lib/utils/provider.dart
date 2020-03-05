@@ -4,6 +4,7 @@ import 'dart:typed_data';
 
 import 'package:path/path.dart';
 import 'package:sqflite/sqflite.dart';
+import 'package:flutter/services.dart' show rootBundle;
 
 /// Created by U-Demon
 /// Date: 2020/3/3
@@ -26,14 +27,49 @@ class Provider {
 
   // 检查数据库中, 表是否完整, 在部份android中, 会出现表丢失的情况
   Future checkTableIsRight() async {
-
+    List<String> expectTables = ['cat', 'widget', 'collection'];
+    List<String> tables = await getTables();
+    for (String table in expectTables) {
+      if (!tables.contains(table)) {
+        return false;
+      }
+    }
+    return true;
   }
 
   // 初始化数据库
   Future init(bool isCreate) async {
     String databasesPath = await getDatabasesPath();
-    String path = join(databasesPath, 'easy_app.db');
-    print(path);
+    String path = join(databasesPath, 'easy.db');
+    print('sqlite db paht: $path');
+    try {
+      db = await openDatabase(path);
+    } catch (e) {
+      print('Error $e');
+    }
+
+    // 检测数据库完整性
+    bool tableIsRight = await this.checkTableIsRight();
+    if (!tableIsRight) {
+      // 关闭上面打开的db，否则无法执行open
+      db.close();
+      // Delete the database
+      await deleteDatabase(path);
+      ByteData data = await rootBundle.load("assets/app.db");
+      List<int> bytes = data.buffer.asUint8List(data.offsetInBytes, data.lengthInBytes);
+      await new File(path).writeAsBytes(bytes);
+
+      db = await openDatabase(path, version: 1,
+          onCreate: (Database db, int version) async {
+            print('db created version is $version');
+          },
+          onOpen: (Database db) async {
+            print('new db opend');
+          });
+    }
+    else {
+      print('Opening existing database');
+    }
   }
 
 }

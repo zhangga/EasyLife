@@ -1,8 +1,10 @@
 import 'package:flutter/material.dart';
 
+import 'package:EasyApp/utils/constant.dart';
 import 'package:EasyApp/event/event_bus.dart';
 import 'package:EasyApp/utils/provider.dart';
-import 'package:EasyApp/utils/file_utils.dart';
+import 'package:EasyApp/utils/data_utils.dart';
+import 'package:EasyApp/model/user_info.dart';
 import 'package:EasyApp/views/home.dart';
 import 'package:EasyApp/views/login_page/login_page.dart';
 import 'package:flutter_spinkit/flutter_spinkit.dart';
@@ -12,8 +14,10 @@ import 'package:event_bus/event_bus.dart';
 // 启动入口
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
-  final provider = new Provider();
-  await provider.init(true);
+  if (Constant.PLATFORM() != WEB) {
+    final provider = new Provider();
+    await provider.init(true);
+  }
   runApp(new MyApp());
 }
 
@@ -26,6 +30,7 @@ class _MyAppState extends State<MyApp> {
   int themeColor = 0xFFC91B3A;
   bool _hasLogin = false;
   bool _isLoading = true;
+  UserInfo _userInfo;
 
   _MyAppState() {
     final eventBus = new EventBus();
@@ -35,16 +40,37 @@ class _MyAppState extends State<MyApp> {
   @override
   void initState() {
     super.initState();
-    FileUtils.readFile().then((value) {
-      _isLoading = false;
-      print('读取到数据：'+value);
+    // 检查登录
+    DataUtils.checkLogin().then((hasLogin) {
+      if (hasLogin.runtimeType == UserInfo) {
+        setState(() {
+          _isLoading = false;
+          _hasLogin = true;
+          _userInfo = hasLogin;
+          if (_userInfo.themeColor != "default") {
+            themeColor = int.parse(_userInfo.themeColor);
+          }
+        });
+      }
+      else {
+        setState(() {
+          _isLoading = false;
+          _hasLogin = hasLogin;
+        });
+      }
+    }).catchError((onError) {
+      setState(() {
+        _hasLogin = false;
+        _isLoading = false;
+      });
+      print('身份信息验证失败:$onError');
     });
   }
 
   @override
   Widget build(BuildContext context) {
     return new MaterialApp(
-      title: 'titles',
+      title: 'Tool',
       theme: new ThemeData(
         primaryColor: Color(this.themeColor),
         backgroundColor: Color(0xFFEFEFEF),
@@ -72,17 +98,26 @@ class _MyAppState extends State<MyApp> {
     if (_isLoading) {
       return Container(
         color: Color(this.themeColor),
-        child: Center(child: SpinKitPouringHourglass(color: Colors.white),),
+        child: Center(child: showLoadingPage(),),
       );
     }
     else {
       // 判断是否已经登录
       if (_hasLogin) {
-        return AppPage();
+        return AppPage(_userInfo);
       }
       else {
         return LoginPage();
       }
+    }
+  }
+
+  showLoadingPage() {
+    if (Constant.PLATFORM() == WEB) {
+      return Text('Loading');
+    }
+    else {
+      return SpinKitPouringHourglass(color: Colors.white);
     }
   }
 }
