@@ -18,6 +18,7 @@ environment:
 
 # 库地址 https://pub.dev
 # go-flutter https://github.com/go-flutter-desktop/plugins
+# https://book.flutterchina.club/chapter1/flutter_intro.html
 dependencies:
   flutter:
     sdk: flutter

@@ -37,7 +37,7 @@ class UserInfo {
 
   factory UserInfo.getUser(String username, String passwrd, String token) {
     return UserInfo(
-      id: 0,
+      id: 1,
       username: username,
       password: passwrd,
       token: token,

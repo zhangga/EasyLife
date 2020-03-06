@@ -19,11 +19,23 @@ class Api {
   }
 
   // 获取数据表数据
-  static Map<String, dynamic> GET_TABLE_DATA(String tableName) {
+  static Map<String, dynamic> GET_TABLE_DATA(String tableName, String token) {
     return {
-      'token': '',
+      'token': token,
       'cmd': '2',
       'table_name': tableName
+    };
+  }
+
+  // 获取指定列的数据
+  static Map<String, dynamic> GET_TABLE_DATA_COLUMN(String tableName, List<String> cols, String token) {
+    if (cols == null || cols.isEmpty)
+      return GET_TABLE_DATA(tableName, token);
+    return {
+      'token': token,
+      'cmd': '18',
+      'table': tableName,
+      'cols': cols.join(',')
     };
   }
 

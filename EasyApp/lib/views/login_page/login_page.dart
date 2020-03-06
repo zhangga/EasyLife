@@ -88,9 +88,9 @@ class _LoginPageState extends State<LoginPage> {
                       Row(
                         mainAxisAlignment: MainAxisAlignment.center,
                         children: <Widget>[
-                          Image.asset('assets/images/gitHub.png', fit: BoxFit.contain, width: 60.0, height: 60.0,),
+                          Image.asset('assets/images/svn_big.png', fit: BoxFit.contain, width: 60.0, height: 60.0,),
                           Image.asset('assets/images/arrow.png', fit: BoxFit.contain, width: 40.0, height: 30.0,),
-                          Image.asset('assets/images/FlutterGo.png', fit: BoxFit.contain, width: 60.0, height: 60.0,),
+                          Image.asset('assets/images/favicon.png', fit: BoxFit.contain, width: 60.0, height: 60.0,),
                         ],
                       ),
                       buildSignInTextForm(),
@@ -134,7 +134,7 @@ class _LoginPageState extends State<LoginPage> {
                     _focusScopeNode.requestFocus(_passwordFocusNode);
                   },
                   decoration: InputDecoration(
-                    icon: Icon(Icons.email, color: Colors.black,),
+                    icon: Icon(Icons.account_box, color: Colors.black,),
                     hintText: "SVN用户名",
                     border: InputBorder.none
                   ),

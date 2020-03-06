@@ -8,6 +8,8 @@ import './constant.dart';
 /// Created by U-Demon
 /// Date: 2020/3/4
 class DataUtils {
+  static UserInfo currUserInfo;
+
   // 验证登陆
   static Future checkLogin() async {
     // WEB默认游客登录
@@ -15,8 +17,8 @@ class DataUtils {
       var response = await NetUtils.get(Api.BASE_URL, Api.LOGIN(GUEST_NAME, GUEST_PWD));
       if (response['ret']) {
         // 玩家信息
-        UserInfo userInfo = UserInfo.getGuest(response['token']);
-        return userInfo;
+        currUserInfo = UserInfo.getGuest(response['token']);
+        return currUserInfo;
       }
     }
     // 从本地记录中获取信息，尝试登录
@@ -25,7 +27,8 @@ class DataUtils {
       if (userInfo != null) {
         var response = await NetUtils.get(Api.BASE_URL, Api.LOGIN(userInfo.username, userInfo.password));
         if (response['ret']) {
-          return UserInfo.getUser(userInfo.username, userInfo.password, response['token']);
+          currUserInfo = UserInfo.getUser(userInfo.username, userInfo.password, response['token']);
+          return currUserInfo;
         }
       }
     }
@@ -43,7 +46,13 @@ class DataUtils {
 
   // 获取数据表数据
   static Future getTableDatas(String tableName) async {
-    var response = await NetUtils.get(Api.BASE_URL, Api.GET_TABLE_DATA(tableName));
+    var response = await NetUtils.get(Api.BASE_URL, Api.GET_TABLE_DATA(tableName, currUserInfo.token));
     print(response['data']);
+  }
+
+  // 获取数据表中指定列的数据
+  static Future getTableDatasAtColumn(String tableName, List<String> cols) async {
+    var response = await NetUtils.get(Api.BASE_URL, Api.GET_TABLE_DATA_COLUMN(tableName, cols, currUserInfo.token));
+    return response['data'];
   }
 }
