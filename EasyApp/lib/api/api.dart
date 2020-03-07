@@ -3,7 +3,7 @@
 class Api {
   // 服务器地址
 //  static const String BASE_URL = 'http://127.0.0.1:28100';
-  static const String BASE_URL = 'http://xiaoxiongbaby.com:28100';
+  static const String BASE_URL = 'http://172.178.1450.2032:28100/';
 
   static const String CHECK_LOGIN = BASE_URL + 'checkLogin'; //验证登陆
 
@@ -36,6 +36,16 @@ class Api {
       'cmd': '18',
       'table': tableName,
       'cols': cols.join(',')
+    };
+  }
+
+  // 获取指定SN的数
+  static Map<String, dynamic> GET_TABLE_DATA_BY_SN(String tableName, int sn, String token) {
+    return {
+      'token': token,
+      'cmd': '5',
+      'table': tableName,
+      'sn': sn.toString()
     };
   }
 

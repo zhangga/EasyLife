@@ -2,11 +2,10 @@ import 'package:flutter/material.dart';
 import 'package:event_bus/event_bus.dart';
 import 'package:EasyApp/event/event_bus.dart';
 import 'package:EasyApp/utils/data_utils.dart';
+import 'package:EasyApp/utils/notice_utils.dart';
 import 'package:EasyApp/model/user_info.dart';
 import 'package:EasyApp/model/user_info_cache.dart';
-import 'package:EasyApp/utils/constant.dart';
 import 'package:EasyApp/views/home.dart';
-import 'package:fluttertoast/fluttertoast.dart';
 
 /// Created by U-Demon
 /// Date: 2020/3/4
@@ -246,31 +245,14 @@ class _LoginPageState extends State<LoginPage> {
       }
       // 登录失败
       else if (result.runtimeType == String) {
-        _showToast(result);
+        NoticeUtils.showToast(context, result);
       }
     }).catchError((errorMsg) {
       setState(() {
         isLoading = false;
       });
-      _showToast(errorMsg.toString());
+      NoticeUtils.showToast(context, errorMsg.toString());
     });
-  }
-
-  _showToast(String msg) {
-    if (Constant.PLATFORM() == Windows) {
-      Scaffold.of(context).showSnackBar(new SnackBar(content: Text(msg)));
-    }
-    else {
-      Fluttertoast.showToast(
-          msg: msg.toString(),
-          toastLength: Toast.LENGTH_SHORT,
-          gravity: ToastGravity.CENTER,
-          timeInSecForIos: 1,
-          backgroundColor: Theme.of(context).primaryColor,
-          textColor: Colors.white,
-          fontSize: 16.0
-      );
-    }
   }
 
   void showPassword() {

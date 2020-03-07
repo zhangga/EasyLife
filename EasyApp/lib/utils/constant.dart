@@ -12,6 +12,16 @@ const int WEB = 7;
 const String GUEST_NAME = 'builder';
 const String GUEST_PWD = 'builder@clover';
 
+const List QUEST_TYPE = [
+  1, "主线任务",
+  2, "云海笔记",
+  3, "支线任务",
+  4, "日常任务",
+  5, "周常任务",
+  6, "活动任务",
+  7, "家族任务",
+];
+
 /// Created by U-Demon
 /// Date: 2020/3/5
 class Constant {

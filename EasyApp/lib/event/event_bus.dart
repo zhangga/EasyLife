@@ -5,3 +5,9 @@ import 'package:event_bus/event_bus.dart';
 class ApplicationEvent {
   static EventBus event;
 }
+
+// 任务选中事件
+class QuestSelectedEvent {
+  final int questSn;
+  QuestSelectedEvent(this.questSn);
+}

@@ -55,4 +55,10 @@ class DataUtils {
     var response = await NetUtils.get(Api.BASE_URL, Api.GET_TABLE_DATA_COLUMN(tableName, cols, currUserInfo.token));
     return response['data'];
   }
+
+  // 获取数据表中指定SN的数据
+  static Future getTableDataBySn(String tableName, int sn) async {
+    var response = await NetUtils.get(Api.BASE_URL, Api.GET_TABLE_DATA_BY_SN(tableName, sn, currUserInfo.token));
+    return response;
+  }
 }
