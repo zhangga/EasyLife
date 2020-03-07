@@ -2,8 +2,8 @@
 /// Date: 2020/3/5
 class Api {
   // 服务器地址
-  static const String BASE_URL = 'http://127.0.0.1:28100';
-//  static const String BASE_URL = 'http://172.17.145.203:28100/';
+//  static const String BASE_URL = 'http://127.0.0.1:28100';
+  static const String BASE_URL = 'http://xiaoxiongbaby.com:28100';
 
   static const String CHECK_LOGIN = BASE_URL + 'checkLogin'; //验证登陆
 
