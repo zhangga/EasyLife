@@ -61,4 +61,10 @@ class DataUtils {
     var response = await NetUtils.get(Api.BASE_URL, Api.GET_TABLE_DATA_BY_SN(tableName, sn, currUserInfo.token));
     return response;
   }
+
+  // 更新数据
+  static Future updateTableData(String tableName, int ver, int sn, Map<String, dynamic> datas) async {
+    var response = await NetUtils.get(Api.BASE_URL, Api.UPDATE_TABLE_DATA(tableName, ver, sn, datas, currUserInfo.token));
+    return response;
+  }
 }

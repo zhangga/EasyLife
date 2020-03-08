@@ -168,7 +168,7 @@ class _QuestPageState extends State<QuestPage> with AutomaticKeepAliveClientMixi
           child: TextField(
             controller: _descEditContr,
             onEditingComplete: () {
-              print(_descEditContr.text);
+              _currQuest.desc = _descEditContr.text;
             },
             style: AppTextStyle.label,
             decoration: InputDecoration(hintText: "任务描述",),
@@ -228,6 +228,10 @@ class _QuestPageState extends State<QuestPage> with AutomaticKeepAliveClientMixi
       list.add(DropdownMenuItem(value: QUEST_TYPE[i], child: Text(QUEST_TYPE[i+1])));
     }
     return list;
+  }
+
+  void _updateQuestData() {
+
   }
 
 }
