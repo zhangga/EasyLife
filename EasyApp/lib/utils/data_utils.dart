@@ -1,4 +1,5 @@
 import 'dart:async' show Future;
+import 'dart:convert' as Convert;
 import 'package:EasyApp/api/api.dart';
 import 'package:EasyApp/model/user_info.dart';
 import 'package:EasyApp/model/user_info_cache.dart';
@@ -64,7 +65,9 @@ class DataUtils {
 
   // 更新数据
   static Future updateTableData(String tableName, int ver, int sn, Map<String, dynamic> datas) async {
-    var response = await NetUtils.get(Api.BASE_URL, Api.UPDATE_TABLE_DATA(tableName, ver, sn, datas, currUserInfo.token));
+    String json = Convert.jsonEncode(datas);
+    print("updateTableData = $json");
+    var response = await NetUtils.get(Api.BASE_URL, Api.UPDATE_TABLE_DATA(tableName, ver, sn, json, currUserInfo.token));
     return response;
   }
 }

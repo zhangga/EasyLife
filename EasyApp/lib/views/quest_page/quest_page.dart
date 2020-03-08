@@ -24,21 +24,22 @@ class _QuestPageState extends State<QuestPage> with AutomaticKeepAliveClientMixi
   bool get wantKeepAlive => true;
 
   List<QuestData> _quests = [];
-  QuestData _currQuest = QuestData.fromJson({"sn": "0", "questName": ""});
+  QuestData _currQuest = QuestData({"sn": "0"});
 
   @override
   void initState() {
     super.initState();
+    _initWidget();
     // 事件监听
     ApplicationEvent.event.on<QuestSelectedEvent>().listen(onQuestSelected);
     // 获取任务数据
     DataUtils.getTableDatasAtColumn(QUEST, ['sn', 'questName']).then((result) {
       List<QuestData> list = [];
       for (int i = 0; i < result.length; i++) {
-        list.add(QuestData.fromJson(result[i]));
+        list.add(QuestData(result[i]));
       }
       // 排序
-      list.sort((o1, o2) => o1.sn.compareTo(o2.sn));
+      list.sort((o1, o2) => o1.getSN().compareTo(o2.getSN()));
       setState(() {
         _quests = list;
       });
@@ -74,13 +75,13 @@ class _QuestPageState extends State<QuestPage> with AutomaticKeepAliveClientMixi
     return ListView.separated(
       itemCount: _quests.length,
       separatorBuilder: (context, index) => Divider(height: 10.0),
-      itemBuilder: (context, index) => QuestCardWidget(_quests[index].sn, _quests[index].name),
+      itemBuilder: (context, index) => QuestCardWidget(_quests[index].getSN(), _quests[index].getName()),
     );
   }
 
   // 任务编辑
   Widget buildQuestEdit() {
-    if (_currQuest.sn == 0) {
+    if (_currQuest.getSN() == 0) {
       return Image(image: AssetImage('assets/images/p2.png'));
     }
     return SingleChildScrollView(
@@ -110,10 +111,6 @@ class _QuestPageState extends State<QuestPage> with AutomaticKeepAliveClientMixi
     );
   }
 
-  final TextEditingController _snEditContr = new TextEditingController();
-  final TextEditingController _nameEditContr = new TextEditingController();
-  final TextEditingController _typeEditContr = new TextEditingController();
-  final TextEditingController _descEditContr = new TextEditingController();
   // 基础属性
   Widget buildQuestBase() {
     return Wrap(
@@ -127,9 +124,7 @@ class _QuestPageState extends State<QuestPage> with AutomaticKeepAliveClientMixi
           constraints: BoxConstraints(maxHeight: 30, maxWidth: 100),
           child: TextField(
             controller: _snEditContr,
-            onEditingComplete: () {
-              print(_snEditContr.text);
-            },
+            onEditingComplete: () => _updateQuestData(_snEditContr, _snEditContr.text),
             style: AppTextStyle.label,
             decoration: InputDecoration(hintText: "任务SN",),
           ),
@@ -141,9 +136,7 @@ class _QuestPageState extends State<QuestPage> with AutomaticKeepAliveClientMixi
           constraints: BoxConstraints(maxHeight: 30, maxWidth: 200),
           child: TextField(
             controller: _nameEditContr,
-            onEditingComplete: () {
-              print(_nameEditContr.text);
-            },
+            onEditingComplete: () => _updateQuestData(_nameEditContr, _nameEditContr.text),
             style: AppTextStyle.label,
             decoration: InputDecoration(hintText: "任务名称",),
           ),
@@ -151,15 +144,15 @@ class _QuestPageState extends State<QuestPage> with AutomaticKeepAliveClientMixi
         SizedBox(width: 50.0),
         // 任务类型
         Text('任务类型：', style: AppTextStyle.label),
-        ConstrainedBox(
-          constraints: BoxConstraints(maxHeight: 30, maxWidth: 200),
-          child: DropdownButton(
-            hint: Text('请选择任务类型'),
-            value: _currQuest.type,
-            items: buildQuestType(),
-            onChanged: (value) {print(value);},
-          ),
-        ),
+//        ConstrainedBox(
+//          constraints: BoxConstraints(maxHeight: 30, maxWidth: 200),
+//          child: DropdownButton(
+//            hint: Text('请选择任务类型'),
+//            value: _currQuest.type,
+//            items: buildQuestType(),
+//            onChanged: (value) {print(value);},
+//          ),
+//        ),
         SizedBox(width: 50.0),
         // 任务描述
         Text('任务描述：', style: AppTextStyle.label),
@@ -167,9 +160,7 @@ class _QuestPageState extends State<QuestPage> with AutomaticKeepAliveClientMixi
           constraints: BoxConstraints(maxHeight: 30, maxWidth: 800),
           child: TextField(
             controller: _descEditContr,
-            onEditingComplete: () {
-              _currQuest.desc = _descEditContr.text;
-            },
+            onEditingComplete: () => _updateQuestData(_descEditContr, _descEditContr.text),
             style: AppTextStyle.label,
             decoration: InputDecoration(hintText: "任务描述",),
           ),
@@ -195,15 +186,6 @@ class _QuestPageState extends State<QuestPage> with AutomaticKeepAliveClientMixi
     return Divider(height: 10.0, thickness: 3, indent: 0.0, color: Colors.deepPurple,);
   }
 
-  // 刷新控件的值
-  void updateWidgetValue() {
-    setState(() {
-      _snEditContr.text = _currQuest.sn.toString();
-      _nameEditContr.text = _currQuest.name;
-      _descEditContr.text = _currQuest.desc;
-    });
-  }
-
   // 任务选择事件
   void onQuestSelected(QuestSelectedEvent event) {
     int questSn = event.questSn;
@@ -215,9 +197,9 @@ class _QuestPageState extends State<QuestPage> with AutomaticKeepAliveClientMixi
         return;
       }
       setState(() {
-        _currQuest = QuestData.fromJson(response['data']);
+        _currQuest = QuestData(response['data']);
       });
-      updateWidgetValue();
+      _updateWidgetValue();
     });
   }
 
@@ -230,8 +212,51 @@ class _QuestPageState extends State<QuestPage> with AutomaticKeepAliveClientMixi
     return list;
   }
 
-  void _updateQuestData() {
+  // 刷新控件的值
+  void _updateWidgetValue() {
+    setState(() {
+      QuestData.widget_field.forEach((widget, field) {
+        // 获取值
+        if (!_currQuest.containsKey(field))
+          return;
+        String value = _currQuest.getValue(field);
+        if (widget.runtimeType == TextEditingController) {
+          (widget as TextEditingController).text = value;
+        }
+      });
+    });
+  }
 
+  // 更新任务的值
+  void _updateQuestData(dynamic widget, String value) {
+    if (!QuestData.widget_field.containsKey(widget)) {
+      print('该组件没有对应的映射关系，不会修改数据内容：' + widget.toString());
+      return;
+    }
+    String field = QuestData.widget_field[widget];
+    DataUtils.updateTableData(QUEST, _currQuest.getVerNum(), _currQuest.getSN(), {field: value}).then((response) {
+      if (response['result'] != '1') {
+        NoticeUtils.showToast(context, '保存失败！' + response['hint']);
+        return;
+      }
+      if (response['sn'] == _currQuest.getSN().toString()) {
+        _currQuest.setVerNum(response['verNum']);
+      }
+    }).catchError((e) {
+      NoticeUtils.showToast(context, '保存失败！' + e.toString());
+      return;
+    });
+  }
+
+  // 组件
+  final TextEditingController _snEditContr = new TextEditingController();
+  final TextEditingController _nameEditContr = new TextEditingController();
+  final TextEditingController _descEditContr = new TextEditingController();
+  // 初始化组件映射
+  void _initWidget() {
+    QuestData.widget_field[_snEditContr] = 'sn';
+    QuestData.widget_field[_nameEditContr] = 'questName';
+    QuestData.widget_field[_descEditContr] = 'questDescription';
   }
 
 }

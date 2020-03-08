@@ -3,7 +3,6 @@
 class Api {
   // 服务器地址
 //  static const String BASE_URL = 'http://127.0.0.1:28100';
-  static const String BASE_URL = 'http://127.0.0.1:28100/';
 
   static const String CHECK_LOGIN = BASE_URL + 'checkLogin'; //验证登陆
 
@@ -50,14 +49,14 @@ class Api {
   }
 
   // 更新数据
-  static Map<String, dynamic> UPDATE_TABLE_DATA(String tableName, int ver, int sn, Map<String, dynamic> datas, String token) {
+  static Map<String, dynamic> UPDATE_TABLE_DATA(String tableName, int ver, int sn, String json, String token) {
     return {
       'token': token,
       'cmd': '6',
       'table': tableName,
       'sn': sn.toString(),
       'verNum': ver.toString(),
-      'data': datas.toString(),
+      'data': json,
     };
   }
 
