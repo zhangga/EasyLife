@@ -13,8 +13,9 @@ const String GUEST_NAME = 'builder';
 const String GUEST_PWD = 'builder@clover';
 
 const List QUEST_TYPE = [
+  0, "请选择任务类型",
   1, "主线任务",
-  2, "云海笔记",
+  2, "指引任务",
   3, "支线任务",
   4, "日常任务",
   5, "周常任务",

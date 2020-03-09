@@ -35,6 +35,18 @@ class QuestData {
     return parseString(_data[field]);
   }
 
+  int getIntValue(String field) {
+    return parseInt(_data[field]);
+  }
+
+  bool getBoolValue(String field) {
+    return parseBool(_data[field]);
+  }
+
+  void setValue(String field, dynamic value) {
+    _data[field] = value;
+  }
+
   // 更新对象的值
   void update(Map<String, dynamic> json) {
     json.forEach((key, value) {
@@ -42,8 +54,21 @@ class QuestData {
     });
   }
 
+  static bool parseBool(var value) {
+    if (value.runtimeType == String) {
+      String v = value.toString().toLowerCase();
+      return v == 'true' || v == '1';
+    }
+    else if (value.runtimeType == int || value.runtimeType == double) {
+      return value == 1;
+    }
+    else {
+      return false;
+    }
+  }
+
   static int parseInt(var value) {
-    if (value.runtimeType == String)
+    if (value.runtimeType == String && value.length > 0)
       return int.parse(value);
     else if (value.runtimeType == int || value.runtimeType == double)
       return value;

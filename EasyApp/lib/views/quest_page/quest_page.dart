@@ -94,7 +94,7 @@ class _QuestPageState extends State<QuestPage> with AutomaticKeepAliveClientMixi
         // 右侧任务编辑界面
         child: Wrap(
           spacing: 8.0, // 主轴(水平)方向间距
-          runSpacing: 4.0, // 纵轴（垂直）方向间距
+          runSpacing: 8.0, // 纵轴（垂直）方向间距
           alignment: WrapAlignment.start, //沿主轴方向
           children: <Widget>[
             // 基础属性
@@ -104,6 +104,10 @@ class _QuestPageState extends State<QuestPage> with AutomaticKeepAliveClientMixi
             // 任务目标
             buildBlockTitle('任务目标'),
             buildQuestGoal(),
+            buildDivider(),
+            // 任务目标
+            buildBlockTitle('接取关系'),
+            buildQuestAccept(),
             buildDivider(),
           ],
         ),
@@ -124,7 +128,7 @@ class _QuestPageState extends State<QuestPage> with AutomaticKeepAliveClientMixi
           constraints: BoxConstraints(maxHeight: 30, maxWidth: 100),
           child: TextField(
             controller: _snEditContr,
-            onEditingComplete: () => _updateQuestData(_snEditContr, _snEditContr.text),
+            onEditingComplete: () => _updateQuestData1(_snEditContr, _snEditContr.text),
             style: AppTextStyle.label,
             decoration: InputDecoration(hintText: "任务SN",),
           ),
@@ -136,7 +140,7 @@ class _QuestPageState extends State<QuestPage> with AutomaticKeepAliveClientMixi
           constraints: BoxConstraints(maxHeight: 30, maxWidth: 200),
           child: TextField(
             controller: _nameEditContr,
-            onEditingComplete: () => _updateQuestData(_nameEditContr, _nameEditContr.text),
+            onEditingComplete: () => _updateQuestData1(_nameEditContr, _nameEditContr.text),
             style: AppTextStyle.label,
             decoration: InputDecoration(hintText: "任务名称",),
           ),
@@ -144,23 +148,23 @@ class _QuestPageState extends State<QuestPage> with AutomaticKeepAliveClientMixi
         SizedBox(width: 50.0),
         // 任务类型
         Text('任务类型：', style: AppTextStyle.label),
-//        ConstrainedBox(
-//          constraints: BoxConstraints(maxHeight: 30, maxWidth: 200),
-//          child: DropdownButton(
-//            hint: Text('请选择任务类型'),
-//            value: _currQuest.type,
-//            items: buildQuestType(),
-//            onChanged: (value) {print(value);},
-//          ),
-//        ),
-        SizedBox(width: 50.0),
+        ConstrainedBox(
+          constraints: BoxConstraints(maxHeight: 30, maxWidth: 200),
+          child: DropdownButton(
+            hint: Text('请选择任务类型'),
+            value: _currQuest.getIntValue('questType'),
+            items: buildDropdownMenu(QUEST_TYPE),
+            onChanged: (value) => _updateQuestData0('questType', value),
+          ),
+        ),
+        Row(),
         // 任务描述
         Text('任务描述：', style: AppTextStyle.label),
         ConstrainedBox(
           constraints: BoxConstraints(maxHeight: 30, maxWidth: 800),
           child: TextField(
             controller: _descEditContr,
-            onEditingComplete: () => _updateQuestData(_descEditContr, _descEditContr.text),
+            onEditingComplete: () => _updateQuestData1(_descEditContr, _descEditContr.text),
             style: AppTextStyle.label,
             decoration: InputDecoration(hintText: "任务描述",),
           ),
@@ -169,8 +173,30 @@ class _QuestPageState extends State<QuestPage> with AutomaticKeepAliveClientMixi
     );
   }
 
+  // 任务目标
   Widget buildQuestGoal() {
-    return Row(
+    return Wrap(
+      spacing: 8.0,
+      runSpacing: 10.0,
+      alignment: WrapAlignment.start,
+      children: <Widget>[
+        Text('或关系【||】', style: AppTextStyle.label_blue),
+        // 目标关系
+        Switch(
+          activeColor: Colors.red,
+          inactiveThumbColor: Colors.blue,
+          materialTapTargetSize: MaterialTapTargetSize.shrinkWrap,
+          value: _currQuest.getBoolValue('relationType'),
+          onChanged: (value) => _updateQuestData0('relationType', value ? 1:0),
+        ),
+        Text('与关系【&&】', style: AppTextStyle.label_red),
+      ],
+    );
+  }
+
+  // 任务接取
+  Widget buildQuestAccept() {
+    return Wrap(
 
     );
   }
@@ -178,12 +204,12 @@ class _QuestPageState extends State<QuestPage> with AutomaticKeepAliveClientMixi
   Widget buildBlockTitle(String title) {
     return Row(
       mainAxisAlignment: MainAxisAlignment.start,
-      children: <Widget>[Text(title, style: TextStyle(color: Colors.indigo, fontSize: 30),)],
+      children: <Widget>[Text(title, style: TextStyle(color: Colors.black, fontSize: 25, fontWeight: FontWeight.bold),)],
     );
   }
 
   Widget buildDivider() {
-    return Divider(height: 10.0, thickness: 3, indent: 0.0, color: Colors.deepPurple,);
+    return Divider(height: 10.0, thickness: 5, indent: 0.0, color: Colors.brown,);
   }
 
   // 任务选择事件
@@ -203,13 +229,13 @@ class _QuestPageState extends State<QuestPage> with AutomaticKeepAliveClientMixi
     });
   }
 
-  // 任务类型下拉菜单
-  List<DropdownMenuItem> buildQuestType() {
-    List<DropdownMenuItem> list = [];
-    for (int i = 0; i < QUEST_TYPE.length; i+=2) {
-      list.add(DropdownMenuItem(value: QUEST_TYPE[i], child: Text(QUEST_TYPE[i+1])));
+  // 构建下拉菜单
+  List<DropdownMenuItem> buildDropdownMenu(List list) {
+    List<DropdownMenuItem> menu = [];
+    for (int i = 0; i < list.length; i+=2) {
+      menu.add(DropdownMenuItem(value: list[i], child: Text(list[i+1])));
     }
-    return list;
+    return menu;
   }
 
   // 刷新控件的值
@@ -228,24 +254,31 @@ class _QuestPageState extends State<QuestPage> with AutomaticKeepAliveClientMixi
   }
 
   // 更新任务的值
-  void _updateQuestData(dynamic widget, String value) {
+  void _updateQuestData1(dynamic widget, String value) {
     if (!QuestData.widget_field.containsKey(widget)) {
       print('该组件没有对应的映射关系，不会修改数据内容：' + widget.toString());
       return;
     }
     String field = QuestData.widget_field[widget];
-    DataUtils.updateTableData(QUEST, _currQuest.getVerNum(), _currQuest.getSN(), {field: value}).then((response) {
-      if (response['result'] != '1') {
-        NoticeUtils.showToast(context, '保存失败！' + response['hint']);
-        return;
-      }
-      if (response['sn'] == _currQuest.getSN().toString()) {
-        _currQuest.setVerNum(response['verNum']);
-      }
-    }).catchError((e) {
-      NoticeUtils.showToast(context, '保存失败！' + e.toString());
-      return;
+    _updateQuestData0(field, value);
+  }
+
+  void _updateQuestData0(String field, dynamic value) {
+    setState(() {
+      _currQuest.setValue(field, value);
     });
+//    DataUtils.updateTableData(QUEST, _currQuest.getVerNum(), _currQuest.getSN(), {field: value.toString()}).then((response) {
+//      if (response['result'] != '1') {
+//        NoticeUtils.showToast(context, '保存失败！' + response['hint']);
+//        return;
+//      }
+//      if (response['sn'] == _currQuest.getSN().toString()) {
+//        _currQuest.setVerNum(response['verNum']);
+//      }
+//    }).catchError((e) {
+//      NoticeUtils.showToast(context, '保存失败！' + e.toString());
+//      return;
+//    });
   }
 
   // 组件

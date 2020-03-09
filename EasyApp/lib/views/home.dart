@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:EasyApp/model/user_info.dart';
 import 'package:EasyApp/views/quest_page/quest_page.dart';
 import 'package:EasyApp/views/quest_page/tables_page.dart';
+import 'package:EasyApp/components/search_input.dart';
 
 /// Created by U-Demon
 /// Date: 2020/3/4
@@ -71,11 +72,19 @@ class _MyHomePageState extends State<AppPage> with SingleTickerProviderStateMixi
   }
 
   renderAppBar(BuildContext context, Widget widget, int index) {
-    return AppBar(title: Text(tabData[index]['text']),);
-  }
-
-  Widget buildSearchInput(BuildContext context) {
-    return Text('xxxx');
+    if (index == 0) {
+      return AppBar(title: SearchInput(hintText: '搜索任务名称/ID',));
+    }
+    else if (index == 1) {
+      return AppBar(title: Text(tabData[index]['text']),);
+    }
+    else {
+      return AppBar(
+        title: Text('按照名称/ID搜索'),
+        actions: <Widget>[
+          IconButton(icon: Icon(Icons.search), onPressed: () => showSearch(context: context, delegate: SearchBarDelegate()),),
+        ],);
+    }
   }
 
   void onBottomItemTapped(int index) {
@@ -83,5 +92,4 @@ class _MyHomePageState extends State<AppPage> with SingleTickerProviderStateMixi
       _currentIndex = index;
     });
   }
-
 }
