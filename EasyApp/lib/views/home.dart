@@ -73,7 +73,7 @@ class _MyHomePageState extends State<AppPage> with SingleTickerProviderStateMixi
 
   renderAppBar(BuildContext context, Widget widget, int index) {
     if (index == 0) {
-      return AppBar(title: SearchInput(hintText: '搜索任务名称/ID',));
+      return AppBar(title: SearchInput(hintText: '搜索任务名称/ID', width: 0.2, tableName: QUEST, cols: ['sn', 'questName'],));
     }
     else if (index == 1) {
       return AppBar(title: Text(tabData[index]['text']),);

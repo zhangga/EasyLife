@@ -1,10 +1,17 @@
 import 'package:flutter/material.dart';
 import 'package:EasyApp/utils/style.dart';
+import 'package:EasyApp/utils/data_utils.dart';
 
 class SearchInput extends StatefulWidget {
   final String hintText;
 
-  SearchInput({Key key, this.hintText}) : super(key: key);
+  final double width;
+
+  final String tableName;
+
+  final List<String> cols;
+
+  SearchInput({Key key, this.hintText, this.width, this.tableName, this.cols}) : super(key: key);
 
   @override
   _SearchInputState createState() => _SearchInputState();
@@ -16,9 +23,31 @@ class _SearchInputState extends State<SearchInput> {
   OverlayEntry textFormOverlayEntry;
   LayerLink layerLink = new LayerLink();
 
+  List<String> _datas;
+  List<Widget> _searchResults = [];
+
   @override
   void initState() {
     super.initState();
+    print('Search_Input: table=' + widget.tableName + ', cols=' + widget.cols.toString());
+    // 获取表数据
+    DataUtils.getTableDatasAtColumn(widget.tableName, widget.cols).then((result) {
+      List<String> list = [];
+      for (int i = 0; i < result.length; i++) {
+        String data = '';
+        result[i].forEach((k,v) {
+          if (k.toString().toLowerCase() == 'sn') {
+            data = '【' + v.toString() + '】' + data;
+          } else {
+            data += v.toString();
+          }
+        });
+        list.add(data);
+      }
+      setState(() {
+        _datas = list;
+      });
+    });
     focusNode.addListener(() {
       if (focusNode.hasFocus) {
         overlayEntry = createSelectPopupWindow();
@@ -46,15 +75,20 @@ class _SearchInputState extends State<SearchInput> {
             textFormOverlayEntry.remove();
             textFormOverlayEntry = null;
           }
+          print('点击！！！！！！！！！！！');
         },
         child: ConstrainedBox(
-          constraints: BoxConstraints(maxHeight: 50, maxWidth: 300),
+          constraints: BoxConstraints(maxHeight: 50, maxWidth: MediaQuery.of(context).size.width * widget.width),
           child: CompositedTransformTarget(
             link: layerLink,
             child: TextFormField(
               decoration: InputDecoration(hintText: widget.hintText, hintStyle: AppTextStyle.label),
               style: AppTextStyle.label,
-              focusNode: focusNode,),
+              focusNode: focusNode,
+              // 搜索输入框监听
+              onChanged: (value) => buildSearchResult(value: value?.toString()),
+              onTap: buildSearchResult,
+            ),
           ),
         ),
       ),
@@ -66,35 +100,42 @@ class _SearchInputState extends State<SearchInput> {
   OverlayEntry createSelectPopupWindow() {
     OverlayEntry overlayEntry = new OverlayEntry(builder: (context) {
       return new Positioned(
-        width: 200,
+        width: MediaQuery.of(context).size.width * widget.width,
         child: new CompositedTransformFollower(
           offset: Offset(0.0, 50),
           link: layerLink,
           child: new Material(
             child: new Container(
-                color: Colors.indigo,
-                child: new Column(
-                  children: <Widget>[
-                    new ListTile(
-                      title: new Text("选项1"),
-                      onTap: () {
-                        Toast.show(context: context, message: "选择了选项1");
-                        focusNode.unfocus();
-                      },
-                    ),
-                    new ListTile(
-                        title: new Text("选项2"),
-                        onTap: () {
-                          Toast.show(context: context, message: "选择了选项1");
-                          focusNode.unfocus();
-                        }),
-                  ],
-                )),
+                color: Colors.blueGrey,
+                child: new Column(children: _searchResults,)),
           ),
         ),
       );
     });
     return overlayEntry;
+  }
+
+  /// 构建搜索结果列表
+  void buildSearchResult({String value}) {
+    List<Widget> list = [];
+    // 搜索匹配
+    for (String data in _datas) {
+      if (value != null && !data.contains(value))
+        continue;
+      list.add(ListTile(
+        title: Text(data),
+        onTap: () {
+          Toast.show(context: context, message: '选择了$data');
+          focusNode.unfocus();
+        },
+      ));
+      if (list.length >= 10)
+        break;
+    }
+    setState(() {
+      _searchResults = list;
+      print(_searchResults.toString());
+    });
   }
 }
 
@@ -104,18 +145,18 @@ class Toast {
     //创建一个OverlayEntry对象
     OverlayEntry overlayEntry = new OverlayEntry(builder: (context) {
       return new Positioned(
-          top: MediaQuery.of(context).size.height * 0.7,
+          top: MediaQuery.of(context).size.height * 0.9,
           child: new Material(
             child: new Container(
-              width: MediaQuery.of(context).size.width,
+              width: MediaQuery.of(context).size.width * 0.2,
               alignment: Alignment.center,
               child: new Center(
                 child: new Card(
                   child: new Padding(
                     padding: EdgeInsets.all(8),
-                    child: new Text(message),
+                    child: new Text(message, style: TextStyle(fontWeight: FontWeight.bold, color: Colors.black,),),
                   ),
-                  color: Colors.grey,
+                  color: Colors.pinkAccent,
                 ),
               ),
             ),
