@@ -212,12 +212,16 @@ class _QuestPageState extends State<QuestPage> with AutomaticKeepAliveClientMixi
     return Divider(height: 10.0, thickness: 5, indent: 0.0, color: Colors.brown,);
   }
 
+  void onClick() {
+    print('click!!!');
+  }
+
   // 任务选择事件
   void onQuestSelected(QuestSelectedEvent event) {
     int questSn = event.questSn;
     print("选择任务：" + questSn.toString());
     DataUtils.getTableDataBySn(QUEST, questSn).then((response) {
-      print("获取数据：" + response.toString());
+//      print("获取数据：" + response.toString());
       if (response['result'] != "1") {
         NoticeUtils.showToast(context, response['hint']);
         return;

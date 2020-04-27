@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:EasyApp/utils/style.dart';
 import 'package:EasyApp/utils/data_utils.dart';
+import 'package:EasyApp/event/event_bus.dart';
 
 class SearchInput extends StatefulWidget {
   final String hintText;
@@ -23,8 +24,8 @@ class _SearchInputState extends State<SearchInput> {
   OverlayEntry textFormOverlayEntry;
   LayerLink layerLink = new LayerLink();
 
-  List<String> _datas;
-  List<Widget> _searchResults = [];
+  List<SearchData> _datas;
+  String _searchKey = '';
 
   @override
   void initState() {
@@ -32,14 +33,14 @@ class _SearchInputState extends State<SearchInput> {
     print('Search_Input: table=' + widget.tableName + ', cols=' + widget.cols.toString());
     // 获取表数据
     DataUtils.getTableDatasAtColumn(widget.tableName, widget.cols).then((result) {
-      List<String> list = [];
+      List<SearchData> list = [];
       for (int i = 0; i < result.length; i++) {
-        String data = '';
+        SearchData data = SearchData();
         result[i].forEach((k,v) {
           if (k.toString().toLowerCase() == 'sn') {
-            data = '【' + v.toString() + '】' + data;
+            data.sn = int.parse(v);
           } else {
-            data += v.toString();
+            data.name = v.toString();
           }
         });
         list.add(data);
@@ -75,7 +76,6 @@ class _SearchInputState extends State<SearchInput> {
             textFormOverlayEntry.remove();
             textFormOverlayEntry = null;
           }
-          print('点击！！！！！！！！！！！');
         },
         child: ConstrainedBox(
           constraints: BoxConstraints(maxHeight: 50, maxWidth: MediaQuery.of(context).size.width * widget.width),
@@ -85,14 +85,21 @@ class _SearchInputState extends State<SearchInput> {
               decoration: InputDecoration(hintText: widget.hintText, hintStyle: AppTextStyle.label),
               style: AppTextStyle.label,
               focusNode: focusNode,
-              // 搜索输入框监听
-              onChanged: (value) => buildSearchResult(value: value?.toString()),
-              onTap: buildSearchResult,
+              // 搜索输入
+              onChanged: (value) => onChangeSearchKey(value),
             ),
           ),
         ),
       ),
     );
+  }
+
+  void onChangeSearchKey(value) {
+    _searchKey = value;
+    print('搜索：' + _searchKey);
+    overlayEntry.remove();
+    overlayEntry = createSelectPopupWindow();
+    Overlay.of(context).insert(overlayEntry);
   }
 
   /// 利用Overlay实现PopupWindow效果，悬浮的widget
@@ -107,7 +114,7 @@ class _SearchInputState extends State<SearchInput> {
           child: new Material(
             child: new Container(
                 color: Colors.blueGrey,
-                child: new Column(children: _searchResults,)),
+                child: new Column(children: buildSearchResult(),)),
           ),
         ),
       );
@@ -116,26 +123,25 @@ class _SearchInputState extends State<SearchInput> {
   }
 
   /// 构建搜索结果列表
-  void buildSearchResult({String value}) {
+  List<Widget> buildSearchResult() {
     List<Widget> list = [];
     // 搜索匹配
-    for (String data in _datas) {
-      if (value != null && !data.contains(value))
+    for (SearchData data in _datas) {
+      String dataValue = data.getShowValue();
+      if (!dataValue.contains(_searchKey))
         continue;
       list.add(ListTile(
-        title: Text(data),
+        title: Text(dataValue),
         onTap: () {
-          Toast.show(context: context, message: '选择了$data');
+          Toast.show(context: context, message: '选择了$dataValue');
           focusNode.unfocus();
+          ApplicationEvent.event.fire(QuestSelectedEvent(data.sn));
         },
       ));
       if (list.length >= 10)
         break;
     }
-    setState(() {
-      _searchResults = list;
-      print(_searchResults.toString());
-    });
+    return list;
   }
 }
 
@@ -167,6 +173,16 @@ class Toast {
     new Future.delayed(Duration(seconds: 2)).then((value) {
       overlayEntry.remove();
     });
+  }
+}
+
+/// 搜索结果
+class SearchData {
+  int sn;
+  String name;
+
+  String getShowValue() {
+    return '【'+sn.toString()+'】' + name;
   }
 }
 
