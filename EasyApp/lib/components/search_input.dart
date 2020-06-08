@@ -30,6 +30,9 @@ class _SearchInputState extends State<SearchInput> {
   @override
   void initState() {
     super.initState();
+    // 监听事件
+    ApplicationEvent.event.on<TapBlankEvent>().listen(onClickedBlank);
+    ApplicationEvent.event.on<QuestSelectedEvent>().listen(onClickedBlank);
     print('Search_Input: table=' + widget.tableName + ', cols=' + widget.cols.toString());
     // 获取表数据
     DataUtils.getTableDatasAtColumn(widget.tableName, widget.cols).then((result) {
@@ -142,6 +145,10 @@ class _SearchInputState extends State<SearchInput> {
         break;
     }
     return list;
+  }
+
+  void onClickedBlank(event) {
+    focusNode.unfocus();
   }
 }
 

@@ -51,22 +51,25 @@ class _QuestPageState extends State<QuestPage> with AutomaticKeepAliveClientMixi
     super.build(context);
     return Container(
       color: Theme.of(context).backgroundColor,
-      child: Row(children: <Widget>[
-        // 任务列表
-        Scrollbar(
-          child: Container(
-            width: MediaQuery.of(context).size.width * 0.2,
-            color: Colors.grey,
-            child: buildQuestList(),
+      child: GestureDetector(
+        onTap: onTapBlank,
+        child: Row(children: <Widget>[
+          // 任务列表
+          Scrollbar(
+            child: Container(
+              width: MediaQuery.of(context).size.width * 0.2,
+              color: Colors.grey,
+              child: buildQuestList(),
+            ),
           ),
-        ),
-        // 任务编辑
-        Container(
-          width: MediaQuery.of(context).size.width * 0.8,
-          color: Theme.of(context).backgroundColor,
-          child: buildQuestEdit(),
-        ),
-      ],),
+          // 任务编辑
+          Container(
+            width: MediaQuery.of(context).size.width * 0.8,
+            color: Theme.of(context).backgroundColor,
+            child: buildQuestEdit(),
+          ),
+        ],),
+      )
     );
   }
 
@@ -212,10 +215,6 @@ class _QuestPageState extends State<QuestPage> with AutomaticKeepAliveClientMixi
     return Divider(height: 10.0, thickness: 5, indent: 0.0, color: Colors.brown,);
   }
 
-  void onClick() {
-    print('click!!!');
-  }
-
   // 任务选择事件
   void onQuestSelected(QuestSelectedEvent event) {
     int questSn = event.questSn;
@@ -259,6 +258,7 @@ class _QuestPageState extends State<QuestPage> with AutomaticKeepAliveClientMixi
 
   // 更新任务的值
   void _updateQuestData1(dynamic widget, String value) {
+    print('_updateQuestData1');
     if (!QuestData.widget_field.containsKey(widget)) {
       print('该组件没有对应的映射关系，不会修改数据内容：' + widget.toString());
       return;
@@ -268,6 +268,7 @@ class _QuestPageState extends State<QuestPage> with AutomaticKeepAliveClientMixi
   }
 
   void _updateQuestData0(String field, dynamic value) {
+    print('_updateQuestData1');
     setState(() {
       _currQuest.setValue(field, value);
     });
@@ -294,6 +295,10 @@ class _QuestPageState extends State<QuestPage> with AutomaticKeepAliveClientMixi
     QuestData.widget_field[_snEditContr] = 'sn';
     QuestData.widget_field[_nameEditContr] = 'questName';
     QuestData.widget_field[_descEditContr] = 'questDescription';
+  }
+
+  void onTapBlank() {
+    ApplicationEvent.event.fire(TapBlankEvent());
   }
 
 }

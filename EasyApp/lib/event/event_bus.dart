@@ -11,3 +11,8 @@ class QuestSelectedEvent {
   final int questSn;
   QuestSelectedEvent(this.questSn);
 }
+
+// 点击空白处
+class TapBlankEvent {
+  TapBlankEvent();
+}

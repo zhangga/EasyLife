@@ -3,6 +3,7 @@ import 'package:EasyApp/model/user_info.dart';
 import 'package:EasyApp/views/quest_page/quest_page.dart';
 import 'package:EasyApp/views/quest_page/tables_page.dart';
 import 'package:EasyApp/components/search_input.dart';
+import 'package:EasyApp/event/event_bus.dart';
 
 /// Created by U-Demon
 /// Date: 2020/3/4
@@ -49,9 +50,12 @@ class _MyHomePageState extends State<AppPage> with SingleTickerProviderStateMixi
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: renderAppBar(context, widget, _currentIndex),
-      body: IndexedStack(
-        index: _currentIndex,
-        children: _list,
+      body: GestureDetector(
+        onTap: onTapBlank,
+        child: IndexedStack(
+          index: _currentIndex,
+          children: _list,
+        ),
       ),
       bottomNavigationBar: BottomNavigationBar(
         items: _myTabs,
@@ -91,5 +95,9 @@ class _MyHomePageState extends State<AppPage> with SingleTickerProviderStateMixi
     setState(() {
       _currentIndex = index;
     });
+  }
+
+  void onTapBlank() {
+    ApplicationEvent.event.fire(TapBlankEvent());
   }
 }
